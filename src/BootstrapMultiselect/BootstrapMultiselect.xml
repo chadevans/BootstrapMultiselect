@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget id="BootstrapMultiselect.widget.BootstrapMultiselect" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/">
+    <name>BootstrapMultiselect</name>
+    <description>The description of this widget.</description>
+
+    <icon></icon>
+
+    <properties>
+        <property key="reference" type="entity" isPath="yes" pathType="referenceSet">
+            <caption>Association</caption>
+            <category>Data Source</category>
+            <description>The reference entity.</description>
+        </property>
+        <property key="constraint" type="entityConstraint" entityProperty="reference" required="false">
+            <caption>XPath Constraint</caption>
+            <category>Data Source</category>
+            <description>The XPath constraint on the objects. Important: The constraint might hide objects that are already in the ReferenceSet.</description>
+        </property>
+        <property key="displayAttr" type="attribute" entityProperty="reference">
+            <caption>Display Attribute</caption>
+            <category>Data Source</category>
+            <description>The attribute to display in the dropdown.</description>
+            <attributeTypes>
+                <attributeType name="String" />
+                <attributeType name="Enum" />
+            </attributeTypes>
+        </property>
+        <property key="sortAttr" type="attribute" entityProperty="reference">
+            <caption>Sort Attribute</caption>
+            <category>Data Source</category>
+            <description>The attribute to sort on.</description>
+            <attributeTypes>
+                <attributeType name="String" />
+                <attributeType name="Integer" />
+                <attributeType name="Enum" />
+            </attributeTypes>
+        </property>
+        <property key="sortOrder" type="enumeration" defaultValue="Asc">
+            <caption>Sort Order</caption>
+            <category>Data Source</category>
+            <description>The sort order.</description>
+            <enumerationValues>
+                <enumerationValue key="Asc">Ascending</enumerationValue>
+                <enumerationValue key="Desc">Descending</enumerationValue>
+            </enumerationValues>
+        </property>
+        <property key="limit" type="integer" defaultValue="0">
+            <caption>Limit</caption>
+            <category>Data Source</category>
+            <description>A limit for the amount of objects shown. 0 equals no limit.</description>
+        </property>
+        <property key="dropdownLocation" type="enumeration" defaultValue="Left">
+            <caption>Dropdown Location</caption>
+            <category>Display</category>
+            <description>Where to start the dropdown menu: starting from the left or from the right.</description>
+            <enumerationValues>
+                <enumerationValue key="Left">Left</enumerationValue>
+                <enumerationValue key="Right">Right</enumerationValue>
+            </enumerationValues>
+        </property>
+        <property key="filtering" type="enumeration" defaultValue="None">
+            <caption>Filtering Type</caption>
+            <category>Display</category>
+            <description>What kind of filtering to display: none, case-sensitive, case-insensitive.</description>
+            <enumerationValues>
+                <enumerationValue key="None">None</enumerationValue>
+                <enumerationValue key="Case">Case-sensitive</enumerationValue>
+                <enumerationValue key="NoCase">Case-insensitive</enumerationValue>
+            </enumerationValues>
+        </property>
+        <property key="selectAll" type="boolean" defaultValue="false">
+            <caption>Show Select All?</caption>
+            <category>Display</category>
+            <description>Show the Select All option.</description>
+        </property>
+        <property key="buttonClass" type="string" required="false">
+            <caption>Button Class</caption>
+            <category>Display</category>
+            <description>Class to apply to the dropdown button.</description>
+        </property>
+        <property key="extraOptions" type="string" defaultValue="" required="false" multiline="true">
+            <caption>Extra Options</caption>
+            <category>Display</category>
+            <description>In general, this property should be omitted. This property can be used to add additional options (in JSON format) to the widget when constructing. For a full description of the available options, see http://davidstutz.github.io/bootstrap-multiselect/.</description>
+        </property>
+    </properties>
+</widget>
+
