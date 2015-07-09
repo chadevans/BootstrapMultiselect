@@ -1,5 +1,7 @@
 /**
  * Bootstrap Multiselect (https://github.com/davidstutz/bootstrap-multiselect)
+ * VERSION 0.9.13
+ * NOTE: Please see changes in comparison to lib_src\bootstrap-multiselect.js.
  * 
  * Apache License, Version 2.0:
  * Copyright (c) 2012 - 2015 David Stutz
@@ -481,10 +483,10 @@
 
                 if (isSelectAllOption) {
                     if (checked) {
-                        this.selectAll();
+                        this.selectAll(null, true);
                     }
                     else {
-                        this.deselectAll();
+                        this.deselectAll(null, true);
                     }
                 }
 
@@ -1116,7 +1118,7 @@
             }
             
             if (triggerOnSelectAll) {
-                this.options.onSelectAll();
+                this.options.onSelectAll(true);
             }
         },
 
@@ -1127,7 +1129,7 @@
          * 
          * @param {Boolean} justVisible
          */
-        deselectAll: function (justVisible) {
+        deselectAll: function (justVisible, triggerOnDeselectAll) {
             var justVisible = typeof justVisible === 'undefined' ? true : justVisible;
             
             if(justVisible) {              
@@ -1153,6 +1155,10 @@
                 if (this.options.selectedClass) {
                     $("li:not(.divider):not(.disabled)", this.$ul).removeClass(this.options.selectedClass);
                 }
+            }
+            
+            if (triggerOnDeselectAll) {
+                this.options.onSelectAll(false);
             }
         },
 
@@ -1291,7 +1297,7 @@
                 if (checkedBoxesLength > 0 && checkedBoxesLength === allBoxesLength) {
                     selectAllInput.prop("checked", true);
                     selectAllLi.addClass(this.options.selectedClass);
-                    this.options.onSelectAll();
+                    this.options.onSelectAll(true);
                 }
                 else {
                     selectAllInput.prop("checked", false);

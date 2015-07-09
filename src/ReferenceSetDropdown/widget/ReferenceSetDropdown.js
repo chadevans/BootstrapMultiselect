@@ -2,19 +2,19 @@
 /*global mx, define, require, browser, devel, console, document, jQuery */
 /*mendix */
 /*
-    BootstrapMultiselect
+    ReferenceSetDropdown
     ========================
 
-    @file      : BootstrapMultiselect.js
-    @version   : 0.1
+    @file      : ReferenceSetDropdown.js
+    @version   : 0.2
     @author    : Chad Evans
-    @date      : Fri, 26 Jun 2015 19:28:43 GMT
+    @date      : 7 Jul 2015
     @copyright : 2015, Mendix B.v.
     @license   : Apache v2
 
     Documentation
     ========================
-    Describe your widget here.
+    A dropdown reference set selector input control, for use with many-to-many relationships.
 */
 
 // Required module list. Remove unnecessary modules, you can always get them back from the boilerplate.
@@ -22,8 +22,8 @@ define([
     'dojo/_base/declare', 'mxui/widget/_WidgetBase', 'dijit/_TemplatedMixin',
     'mxui/dom', 'dojo/dom', 'dojo/query', 'dojo/dom-prop', 'dojo/dom-geometry', 'dojo/dom-class', 'dojo/dom-style',
     'dojo/dom-construct', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/text', 'dojo/json', 'dojo/html', 'dojo/_base/event',
-    'BootstrapMultiselect/lib/jquery-1.11.2', 'BootstrapMultiselect/lib/bootstrap-multiselect',
-    'dojo/text!BootstrapMultiselect/widget/template/BootstrapMultiselect.html'
+    'ReferenceSetDropdown/lib/jquery-1.11.2', 'ReferenceSetDropdown/lib/bootstrap-multiselect',
+    'dojo/text!ReferenceSetDropdown/widget/template/ReferenceSetDropdown.html'
 ], function (declare, _WidgetBase, _TemplatedMixin,
     dom, dojoDom, domQuery, domProp, domGeom, domClass, domStyle,
     domConstruct, dojoArray, lang, text, json, html, event,
@@ -33,7 +33,7 @@ define([
     var $ = _jQuery.noConflict(true);
 
     // Declare widget's prototype.
-    return declare('BootstrapMultiselect.widget.BootstrapMultiselect', [_WidgetBase, _TemplatedMixin], {
+    return declare('ReferenceSetDropdown.widget.ReferenceSetDropdown', [_WidgetBase, _TemplatedMixin], {
 
         // _TemplatedMixin will create our dom node using this HTML template.
         templateString: widgetTemplate,
@@ -57,8 +57,12 @@ define([
         // Internal variables. Non-primitives created in the prototype are shared between all widget instances.
         _handles: null,
         _contextObj: null,
+        _refGuids: [],
         _alertDiv: null,
         _options: {},
+        _referenceEntity: null,
+        _referencePath: null,
+        _createdWidget: null,
         _multiselectButtons: null,
         _multiselectGroups: null,
 
@@ -109,24 +113,30 @@ define([
 
         // Attach events to HTML dom elements
         _setupEvents: function () {
+            this._referenceEntity = this.reference.split('/')[1];
+            this._referencePath = this.reference.split('/')[0];
+
+            this._options.onChange = lang.hitch(this, this._referenceChange);
+            this._options.onSelectAll = lang.hitch(this, this._referenceAllChange);
+
             if (this.dropdownLocation === "Right") {
                 this._options.dropRight = true;
             }
-            
+
             if (this.filtering === "Case") {
                 this._options.enableFiltering = true;
             } else if (this.filtering === "NoCase") {
                 this._options.enableCaseInsensitiveFiltering = true;
             }
-            
+
             if (this.selectAll) {
                 this._options.includeSelectAllOption = true;
             }
-            
+
             if (this.buttonClass !== '') {
                 this._options.buttonClass = this.buttonClass;
             }
-            
+
             if (this.extraOptions !== '') {
                 lang.mixin(this._options, json.parse(this.extraOptions));
             }
@@ -134,13 +144,11 @@ define([
 
         // Rerender the interface.
         _updateRendering: function () {
-            console.log(this.id + '.updaterendering');
-
-            if (this._multiselectNode) {
+            if (this._createdWidget) {
                 if (this.readOnly) {
-                    this._multiselectNode.multiselect('disable');
+                    this._createdWidget.multiselect('disable');
                 } else {
-                    this._multiselectNode.multiselect('enable');
+                    this._createdWidget.multiselect('enable');
                 }
             }
 
@@ -148,16 +156,15 @@ define([
                 domStyle.set(this.domNode, 'display', 'block');
 
                 //default fetch
-                var refEntity = this.reference.split('/')[1],
-                    filters = {},
-                    xpath = '//' + refEntity;
+                var filters = {},
+                    xpath = '//' + this._referenceEntity;
 
                 filters.sort = [[this.sortAttr, this.sortOrder]];
                 if (this.limit > 0) {
                     filters.amount = this.limit;
                 }
                 if (this.constraint) {
-                    xpath = '//' + refEntity + this.constraint.replace('[%CurrentObject%]', this._contextObj);
+                    xpath = xpath + this.constraint.replace('[%CurrentObject%]', this._contextObj);
                 }
                 mx.data.get({
                     xpath: xpath,
@@ -172,8 +179,6 @@ define([
 
             // Important to clear all validations!
             this._clearValidations();
-
-            console.log(this.id + '.updaterendering - done');
         },
 
         /**
@@ -181,8 +186,6 @@ define([
          * ======================
          */
         _processData: function (objs) {
-            console.log(this.id + '.processdata');
-
             var data = [],
                 finalLength = objs.length;
 
@@ -195,6 +198,7 @@ define([
                         //value = value.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gm, ' Warning! Script tags not allowed. ');
                     }
 
+                    this._refGuids.push(obj.getGuid());
                     data.push({
                         'id': obj.getGuid(),
                         'caption': display
@@ -202,7 +206,11 @@ define([
                     if (data.length === finalLength) {
                         this._buildTemplate(data);
 
-                        $(this.selectNode).multiselect(this._options);
+                        if (this._createdWidget) {
+                            this._createdWidget.multiselect('destroy');
+                        }
+
+                        this._createdWidget = $(this.selectNode).multiselect(this._options);
 
                         // grab the button and button group
                         this._multiselectGroups = domQuery(".btn-group", this.domNode);
@@ -214,29 +222,51 @@ define([
 
                             domClass.toggle(this._multiselectGroups[0], "open");
                         }));
-
-                        console.log(this.id + '.processdata - multiselect done');
                     }
                 }));
             }));
-
-            console.log(this.id + '.processdata - done');
         },
 
         _buildTemplate: function (rows) {
-            console.log(this.id + '.buildtemplate');
+            var guids = this._contextObj.getReferences(this._referencePath);
 
-            dojoArray.forEach(rows, lang.hitch(this, function (rowData) {
-                var row = domConstruct.create('option', {
-                    id: this.domNode.id + '_' + rowData.id,
-                    value: rowData.id,
-                    innerHTML: rowData.caption
-                }, this.selectNode);
+            dojoArray.forEach(rows, lang.hitch(this, function (row) {
+                var settings = {
+                    id: this.domNode.id + '_' + row.id,
+                    value: row.id,
+                    innerHTML: row.caption
+                };
+
+                if (guids.indexOf(settings.value) > -1) {
+                    settings.selected = "selected";
+                }
+
+                domConstruct.create('option', settings, this.selectNode);
             }));
+        },
 
-            //this._setReferencedBoxes(this._contextObj.getReferences(this.reference.split('/')[0]));
+        _referenceChange: function (option, checked) {
+            var guid = $(option).val();
+            if (checked) {
+                // add the reference to the object
+                this._contextObj.addReferences(this._referencePath, [guid]);
+            } else {
+                // remove the reference to the object
+                this._contextObj.removeReferences(this._referencePath, [guid]);
+            }
+        },
 
-            console.log(this.id + '.buildtemplate - done');
+        _referenceAllChange: function (checked) {
+            var guids;
+            if (checked) {
+                // add all references
+                guids = this._refGuids;
+                this._contextObj.addReferences(this._referencePath, guids);
+            } else {
+                // remove all references
+                guids = this._contextObj.getReferences(this._referencePath);
+                this._contextObj.removeReferences(this._referencePath, guids);
+            }
         },
 
         // Handle validations.
@@ -244,14 +274,14 @@ define([
             this._clearValidations();
 
             var _validation = _validations[0],
-                _message = _validation.getReasonByAttribute(this.reference.split('/')[0]);
+                _message = _validation.getReasonByAttribute(this._referencePath);
 
             if (this.readOnly) {
-                _validation.removeAttribute(this.reference.split('/')[0]);
+                _validation.removeAttribute(this._referencePath);
             } else {
                 if (_message) {
                     this._addValidation(_message);
-                    _validation.removeAttribute(this.reference.split('/')[0]);
+                    _validation.removeAttribute(this._referencePath);
                 }
             }
         },
@@ -298,7 +328,7 @@ define([
             // When a mendix object exists create subscribtions. 
             if (this._contextObj) {
                 _entHandle = this.subscribe({
-                    entity: this.reference.split('/')[1],
+                    entity: this._referenceEntity,
                     callback: lang.hitch(this, function () {
                         this._updateRendering();
                     })
@@ -313,7 +343,7 @@ define([
 
                 _attrHandle = this.subscribe({
                     guid: this._contextObj.getGuid(),
-                    attr: this.reference.split('/')[0],
+                    attr: this._referencePath,
                     callback: lang.hitch(this, function (guid, attr, attrValue) {
                         this._updateRendering();
                     })
@@ -330,6 +360,6 @@ define([
         }
     });
 });
-require(['BootstrapMultiselect/widget/BootstrapMultiselect'], function () {
+require(['ReferenceSetDropdown/widget/ReferenceSetDropdown'], function () {
     'use strict';
 });

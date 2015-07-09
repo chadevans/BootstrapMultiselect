@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<widget id="BootstrapMultiselect.widget.BootstrapMultiselect" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/">
-    <name>BootstrapMultiselect</name>
-    <description>The description of this widget.</description>
+<widget id="ReferenceSetDropdown.widget.ReferenceSetDropdown" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/">
+    <name>ReferenceSetDropdown</name>
+    <description>A dropdown reference set selector input control, for use with many-to-many relationships.</description>
 
     <icon></icon>
 

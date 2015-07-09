@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <package xmlns="http://www.mendix.com/package/1.0/">
-	<clientModule name="BootstrapMultiselect" version="0.1" xmlns="http://www.mendix.com/clientModule/1.0/">
+	<clientModule name="ReferenceSetDropdown" version="0.2" xmlns="http://www.mendix.com/clientModule/1.0/">
 		<widgetFiles>
-			<widgetFile path="BootstrapMultiselect/BootstrapMultiselect.xml"/>
+			<widgetFile path="ReferenceSetDropdown/ReferenceSetDropdown.xml"/>
 		</widgetFiles>
 		<files>
-			<file path="BootstrapMultiselect/widget/"/>
+			<file path="ReferenceSetDropdown/widget/"/>
 		</files>
 	</clientModule>
 </package>
