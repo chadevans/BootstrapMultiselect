@@ -6,9 +6,9 @@
     ========================
 
     @file      : ReferenceSetDropdown.js
-    @version   : 0.2
+    @version   : 0.3
     @author    : Chad Evans
-    @date      : 7 Jul 2015
+    @date      : 10 Jul 2015
     @copyright : 2015, Mendix B.v.
     @license   : Apache v2
 
@@ -59,7 +59,6 @@ define([
         _contextObj: null,
         _refGuids: [],
         _alertDiv: null,
-        _options: {},
         _referenceEntity: null,
         _referencePath: null,
         _createdWidget: null,
@@ -73,7 +72,7 @@ define([
 
         // dijit._WidgetBase.postCreate is called after constructing the widget. Implement to do extra setup work.
         postCreate: function () {
-            //console.log(this.id + '.postCreate');
+            console.log(this.id + '.postCreate');
 
             this._updateRendering();
             this._setupEvents();
@@ -81,7 +80,7 @@ define([
 
         // mxui.widget._WidgetBase.update is called when context is changed or initialized. Implement to re-render and / or fetch data.
         update: function (obj, callback) {
-            //console.log(this.id + '.update');
+            console.log(this.id + '.update');
 
             this._contextObj = obj;
             this._resetSubscriptions();
@@ -115,31 +114,38 @@ define([
         _setupEvents: function () {
             this._referenceEntity = this.reference.split('/')[1];
             this._referencePath = this.reference.split('/')[0];
+        },
 
-            this._options.onChange = lang.hitch(this, this._referenceChange);
-            this._options.onSelectAll = lang.hitch(this, this._referenceAllChange);
+        // Get the configuration options
+        _getOptions: function () {
+            var options = {};
+
+            options.onChange = lang.hitch(this, this._referenceChange);
+            options.onSelectAll = lang.hitch(this, this._referenceAllChange);
 
             if (this.dropdownLocation === "Right") {
-                this._options.dropRight = true;
+                options.dropRight = true;
             }
 
             if (this.filtering === "Case") {
-                this._options.enableFiltering = true;
+                options.enableFiltering = true;
             } else if (this.filtering === "NoCase") {
-                this._options.enableCaseInsensitiveFiltering = true;
+                options.enableCaseInsensitiveFiltering = true;
             }
 
             if (this.selectAll) {
-                this._options.includeSelectAllOption = true;
+                options.includeSelectAllOption = true;
             }
 
             if (this.buttonClass !== '') {
-                this._options.buttonClass = this.buttonClass;
+                options.buttonClass = this.buttonClass;
             }
 
             if (this.extraOptions !== '') {
-                lang.mixin(this._options, json.parse(this.extraOptions));
+                lang.mixin(options, json.parse(this.extraOptions));
             }
+    
+            return options;
         },
 
         // Rerender the interface.
@@ -210,7 +216,7 @@ define([
                             this._createdWidget.multiselect('destroy');
                         }
 
-                        this._createdWidget = $(this.selectNode).multiselect(this._options);
+                        this._createdWidget = $(this.selectNode).multiselect(this._getOptions());
 
                         // grab the button and button group
                         this._multiselectGroups = domQuery(".btn-group", this.domNode);
@@ -246,6 +252,8 @@ define([
         },
 
         _referenceChange: function (option, checked) {
+            console.log(this.id + '.ref ' + this._contextObj.getGuid());
+
             var guid = $(option).val();
             if (checked) {
                 // add the reference to the object
@@ -257,6 +265,8 @@ define([
         },
 
         _referenceAllChange: function (checked) {
+            console.log(this.id + '.refAll ' + this._contextObj.getGuid());
+
             var guids;
             if (checked) {
                 // add all references

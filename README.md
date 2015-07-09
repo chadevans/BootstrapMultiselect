@@ -1,14 +1,6 @@
-# App Store Widget Boilerplate
+# ReferenceSetDropdown
 
-This boilerplate gives you all you need to start a new custom widget for Mendix 5.6.0 and up.
-
-The boilerplate contains:
-
-- Directory structure.
-- Readme.md file.
-- License.
-- Javascript source.
-- XSD for package.xml, to configure properties of the widget, visible inside the Mendix business modeler.
+Based on the Bootstrap Multiselect project [https://github.com/davidstutz/bootstrap-multiselect](https://github.com/davidstutz/bootstrap-multiselect), enables a simple display for a many-to-many relationship in Mendix.
 
 ## Contributing
 
@@ -16,70 +8,14 @@ For more information on contributing to this repository visit [Contributing to a
 
 ## Typical usage scenario
 
-Use this template to start building a widget for Mendix 5.
-Alter this README.md file and describe what your widget does.
+When you want to allow an entity to have many related entities, and don't want to use the built it Reference Set widget. The use case that this was designed around was doing a custom filtering of a data grid, where you want to allow the users to filter by a product category and allow for multiple categories to be selected.
  
-## Description
+## Configuration
 
-The javascript inside the widget has examples of:
+Once the widget is installed in your project, there are three things that must be set.
 
-- Using CSS within a Widget.
-- Using templating.
-- Loading external library's.
-- DOM manipulation.
-- Event attaching.
-- Loading data.
-- Executing microflow and sending data.
-- Working with the context object (The object that is send by a contextview , for instance a dataview).
+1. Reference: This is the many-to-many reference of the enclosing entity.
+2. Display Attribute: This is the attribute used to generate the capation of each item in the list.
+3. Sort Attribute: This is the attribute used to sort the data before building the list.
 
-### Dojo AMD module list
-
-The javascript contains a really extensive list of modules that may be used to build the widget. It is best to reduce this list to what is actually used. Plugins like jsLint for Notepad++ will show unused objects. **Be sure to keep the module name array and the parameter list of the anonymous function below the module list in sync!**
-
-The following modules are necessary for all widgets:
-
-- dojo/_base/declare
-- mxui/widget/_WidgetBase
-- dijit/_Widget
-
-If your widget does not use an HTML template:
-
-- Remove dijit/_TemplatedMixin from the module list
-- Remove _Templated from the parameter list of the anonymous function below the module list
-- Remove _Templated from the parameter list of the declare call
-- Remove the templates folder
-
-If your widget does not need jQuery:
-
-- Remove WidgetName/widget/lib/jquery from the module list
-- Remove _jQuery from the parameter list of the anonymous function below the module list
-- Remove _jQuery from the parameter list of the declare call
-- Remove jquery.js from src\WidgetName\widget\lib\ Or remove the lib folder if you don't include external libraries in the widget.
-
-## Migrating a widget to Dojo AMD
-
-A widget that uses Dojo AMD may not refer to functions like *dojo.query* etc. All necessary modules must be declared on the module list at the top of the source.
-
-Replacing all 'old' Dojo calls in an existing source can be a bit of a pain.
-
-Here is a list of commonly used functions and their AMD counterpart:
-
-Old | New
----------- |---------- 
-mxui.dom              | domMx
-dojo.byId             | dom.byId
-dojo.query            | domQuery
-dojo.forEach          | dojoArray.forEach
-dojo.hitch            | lang.hitch
-dojo.addClass         | domClass.add
-dojo.removeClass      | domClass.remove
-dojo.hasClass         | domClass.contains
-dojo.replaceClass     | domClass.replace
-dojo.empty            | domConstruct.empty
-dojo.place            | domConstruct.place 
-dojo.on               | on
-dojo.window           | win
-  
-Do not use domQuery.query! Just domQuery
-
-The referenced modules are in the module list of the boilerplate javascript
+You can then figure out how you want the control to behave, like allowing filtering of the list, or allowing a select all option.
