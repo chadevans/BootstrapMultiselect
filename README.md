@@ -19,3 +19,15 @@ Once the widget is installed in your project, there are three things that must b
 3. Sort Attribute: This is the attribute used to sort the data before building the list.
 
 You can then figure out how you want the control to behave, like allowing filtering of the list, or allowing a select all option.
+
+## Known Issues
+
+1. When using this control in the context of a div, for example a Mendix Groupbox, you will need to have overflow: visible for the dropdown to display outside of the div.
+
+Example CSS:
+
+```
+.mx-groupbox .mx-groupbox-body {
+  overflow: visible;
+}
+```

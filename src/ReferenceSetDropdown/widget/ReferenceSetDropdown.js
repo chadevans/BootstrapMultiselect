@@ -6,9 +6,9 @@
     ========================
 
     @file      : ReferenceSetDropdown.js
-    @version   : 0.3
+    @version   : 0.4
     @author    : Chad Evans
-    @date      : 10 Jul 2015
+    @date      : 17 Jul 2015
     @copyright : 2015, Mendix B.v.
     @license   : Apache v2
 
@@ -40,6 +40,7 @@ define([
 
         // attach points in the template
         selectNode: null,
+        alertNode: null,
 
         // Parameters configured in the Modeler.
         reference: "",
@@ -58,7 +59,6 @@ define([
         _handles: null,
         _contextObj: null,
         _refGuids: [],
-        _alertDiv: null,
         _referenceEntity: null,
         _referencePath: null,
         _createdWidget: null,
@@ -144,20 +144,12 @@ define([
             if (this.extraOptions !== '') {
                 lang.mixin(options, json.parse(this.extraOptions));
             }
-    
+
             return options;
         },
 
         // Rerender the interface.
         _updateRendering: function () {
-            if (this._createdWidget) {
-                if (this.readOnly) {
-                    this._createdWidget.multiselect('disable');
-                } else {
-                    this._createdWidget.multiselect('enable');
-                }
-            }
-
             if (this._contextObj !== null) {
                 domStyle.set(this.domNode, 'display', 'block');
 
@@ -218,13 +210,21 @@ define([
 
                         this._createdWidget = $(this.selectNode).multiselect(this._getOptions());
 
+                        if (this._createdWidget) {
+                            if (this.readOnly) {
+                                this._createdWidget.multiselect('disable');
+                            } else {
+                                this._createdWidget.multiselect('enable');
+                            }
+                        }
+
                         // grab the button and button group
                         this._multiselectGroups = domQuery(".btn-group", this.domNode);
                         this._multiselectButtons = domQuery(".multiselect", this.domNode);
 
                         // set up the open/close click event
-                        this.connect(this._multiselectButtons[0], "click", lang.hitch(this, function (e) {
-                            event.stop(e);
+                        this.connect(this._multiselectButtons[0], "click touchstart", lang.hitch(this, function (e) {
+                            this._stopBubblingEventOnMobile(e);
 
                             domClass.toggle(this._multiselectGroups[0], "open");
                         }));
@@ -298,21 +298,14 @@ define([
 
         // Clear validations.
         _clearValidations: function () {
-            domConstruct.destroy(this._alertdiv);
-            this._alertdiv = null;
+            domConstruct.empty(this.alertNode);
+            domStyle.set(this.alertNode, 'display', 'none');
         },
 
         // Show an error message.
         _showError: function (message) {
-            if (this._alertDiv !== null) {
-                html.set(this._alertDiv, message);
-                return true;
-            }
-            this._alertDiv = domConstruct.create("div", {
-                'class': 'alert alert-danger',
-                'innerHTML': message
-            });
-            domConstruct.place(this.domNode, this._alertdiv);
+            html.set(this.alertNode, message);
+            domStyle.set(this.alertNode, 'display', 'block');
         },
 
         // Add a validation.
@@ -362,7 +355,9 @@ define([
                 _validationHandle = this.subscribe({
                     guid: this._contextObj.getGuid(),
                     val: true,
-                    callback: lang.hitch(this, this._handleValidation)
+                    callback: lang.hitch(this, function (validations) {
+                        this._handleValidation(validations);
+                    })
                 });
 
                 this._handles = [_entHandle, _objectHandle, _attrHandle, _validationHandle];
