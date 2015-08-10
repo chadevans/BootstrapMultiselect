@@ -6,9 +6,9 @@
     ========================
 
     @file      : ReferenceSetDropdown.js
-    @version   : 0.4
+    @version   : 0.5
     @author    : Chad Evans
-    @date      : 17 Jul 2015
+    @date      : 10 Aug 2015
     @copyright : 2015, Mendix B.v.
     @license   : Apache v2
 
@@ -20,12 +20,12 @@
 // Required module list. Remove unnecessary modules, you can always get them back from the boilerplate.
 define([
     'dojo/_base/declare', 'mxui/widget/_WidgetBase', 'dijit/_TemplatedMixin',
-    'mxui/dom', 'dojo/dom', 'dojo/query', 'dojo/dom-prop', 'dojo/dom-geometry', 'dojo/dom-class', 'dojo/dom-style',
+    'mxui/dom', 'dojo/dom', 'dojo/query', 'dojo/on', 'dojo/dom-class', 'dojo/dom-style',
     'dojo/dom-construct', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/text', 'dojo/json', 'dojo/html', 'dojo/_base/event',
     'ReferenceSetDropdown/lib/jquery-1.11.2', 'ReferenceSetDropdown/lib/bootstrap-multiselect',
     'dojo/text!ReferenceSetDropdown/widget/template/ReferenceSetDropdown.html'
 ], function (declare, _WidgetBase, _TemplatedMixin,
-    dom, dojoDom, domQuery, domProp, domGeom, domClass, domStyle,
+    dom, dojoDom, domQuery, dojoOn, domClass, domStyle,
     domConstruct, dojoArray, lang, text, json, html, event,
     _jQuery, _multiselect, widgetTemplate) {
     'use strict';
@@ -223,7 +223,7 @@ define([
                         this._multiselectButtons = domQuery(".multiselect", this.domNode);
 
                         // set up the open/close click event
-                        this.connect(this._multiselectButtons[0], "click touchstart", lang.hitch(this, function (e) {
+                        dojoOn(this._multiselectButtons[0], "click", lang.hitch(this, function (e) {
                             this._stopBubblingEventOnMobile(e);
 
                             domClass.toggle(this._multiselectGroups[0], "open");
